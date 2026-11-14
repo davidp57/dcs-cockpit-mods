@@ -7,14 +7,15 @@
 -- action. A slot with no long action runs its short action as soon as the key is pressed.
 --
 -- An action presses a cockpit button: the next one of a cycle, or always the same one.
--- Each cycle remembers its position. Pressing a button through any action also moves every
+-- Each cycle remembers its position; slots given the same cycle table share it. Pressing a
+-- button through any action also moves every
 -- other cycle holding that button to it: after a long press on FCR, a cycle FCR, WPN, TSD
 -- goes on with WPN. Buttons pressed with the mouse are not seen.
 --
 -- The aircraft's buttons and slots are in config/<file>.lua, chosen by aircraft.lua.
 -- Everything the device does is written to dcs.log, lines COCKPIT_CYCLES.
 
-local SLOT_COUNT  = 8
+local SLOT_COUNT  = 16
 local CMD_DOWN    = 3000 -- slot n pressed: CMD_DOWN + n
 local CMD_UP      = 3100 -- slot n released: CMD_UP + n
 -- Seconds of model time between two update() calls. Durations are counted in model time:
@@ -89,6 +90,12 @@ local function check_action(action, where)
 		log_error(where..": not an action table, ignored")
 		return nil
 	end
+	-- One action table shared by several slots: checked once, one cycle position for all.
+	if action.checked ~= nil then
+		log_info(where..": same as "..action.checked_where)
+		return action.checked and action or nil
+	end
+	action.checked, action.checked_where = false, where
 	local buttons
 	if action.cycle ~= nil then
 		if type(action.cycle) ~= "table" or #action.cycle == 0 then
@@ -110,6 +117,7 @@ local function check_action(action, where)
 		end
 	end
 	action.position = 0
+	action.checked = true
 	actions[#actions + 1] = action
 	local names = {}
 	for _, button in ipairs(buttons) do

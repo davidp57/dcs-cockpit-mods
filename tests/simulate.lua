@@ -71,7 +71,7 @@ function print_message_to_user(text) messages[#messages + 1] = text end
 
 dofile(creators[251][2])
 post_initialize()
-check(listened[3001] and listened[3101] and listened[3008] and listened[3108], "slots 1-8 down and up commands listened")
+check(listened[3001] and listened[3101] and listened[3016] and listened[3116], "slots 1-16 down and up commands listened")
 check(update_step and update_step > 0, "update step set")
 
 local function tick(seconds)
@@ -88,48 +88,71 @@ local function presses_down()
 	return list
 end
 
--- Commands of the pilot's left MPD, from the aircraft's own files.
+-- Commands of the MPDs, from the aircraft's own files.
 dofile(aircraft_scripts.."devices.lua")
 dofile(aircraft_scripts.."command_defs.lua")
-local FCR, WPN, TSD = mpd_commands.FCR, mpd_commands.WPN, mpd_commands.TSD
+local FCR, WPN, TSD, VID = mpd_commands.FCR, mpd_commands.WPN, mpd_commands.TSD, mpd_commands.VID
 
-local function short_press()
-	SetCommand(3001, 1); tick(0.1); SetCommand(3101, 1); tick(0.2)
+-- Slots of config/AH-64D.lua: 1-7 left MPD, 8-14 right MPD; in each, no hold, then hold
+-- FCR, WPN, TSD, VID, COM, A/C.
+local LEFT, LEFT_HOLD_FCR, LEFT_HOLD_TSD, LEFT_HOLD_VID, RIGHT = 1, 2, 4, 5, 8
+
+local function short_press(slot)
+	SetCommand(3000 + slot, 1); tick(0.1); SetCommand(3100 + slot, 1); tick(0.2)
 end
-local function long_press()
-	SetCommand(3001, 1); tick(0.7); SetCommand(3101, 1); tick(0.2)
+local function long_press(slot)
+	SetCommand(3000 + slot, 1); tick(0.7); SetCommand(3100 + slot, 1); tick(0.2)
+end
+local function same(seq, expected)
+	if #seq ~= #expected then return false end
+	for i = 1, #seq do if seq[i] ~= expected[i] then return false end end
+	return true
 end
 
-short_press(); short_press(); short_press(); short_press()
-local seq = presses_down()
-check(#seq == 4 and seq[1] == FCR and seq[2] == WPN and seq[3] == TSD and seq[4] == FCR, "short presses cycle FCR, WPN, TSD, FCR")
+-- Without a long press, the page changes as soon as the key is pressed.
+SetCommand(3000 + LEFT, 1)
+check(same(presses_down(), {FCR}), "no-hold command presses at once, before the release")
+SetCommand(3100 + LEFT, 1); tick(0.2)
+short_press(LEFT); short_press(LEFT); short_press(LEFT)
+check(same(presses_down(), {FCR, WPN, TSD, FCR}), "left MPD cycles FCR, WPN, TSD, FCR")
 check(pressed[1].device == devices.MFD_PLT_LEFT and pressed[1].method == "click", "presses go to the pilot's left MPD as clicks")
 local releases = 0
 for _, p in ipairs(pressed) do if p.value == 0 then releases = releases + 1 end end
 check(releases == 4, "each press is released")
 
 pressed = {}
-short_press() -- WPN
-long_press()  -- FCR, and the cycle follows
-short_press() -- WPN
-seq = presses_down()
-check(#seq == 3 and seq[1] == WPN and seq[2] == FCR and seq[3] == WPN, "long press goes to FCR, next short press gives WPN")
+short_press(LEFT_HOLD_TSD) -- WPN: the seven left commands share the cycle
+check(same(presses_down(), {WPN}), "commands of one MPD share the cycle position")
 
 pressed = {}
-SetCommand(3001, 1); tick(0.6)
-check(#presses_down() == 1 and presses_down()[1] == FCR, "long action runs while still held")
-SetCommand(3101, 1); tick(0.2)
+long_press(LEFT_HOLD_TSD)  -- TSD, and the cycle follows
+short_press(LEFT)          -- FCR
+check(same(presses_down(), {TSD, FCR}), "hold TSD goes to TSD, next short press gives FCR")
+
+pressed = {}
+long_press(LEFT_HOLD_VID)  -- VID, not in the cycle: the cycle stays where it was
+short_press(LEFT)          -- WPN
+check(same(presses_down(), {VID, WPN}), "hold VID goes to VID, the cycle goes on")
+
+pressed = {}
+SetCommand(3000 + LEFT_HOLD_FCR, 1); tick(0.6)
+check(same(presses_down(), {FCR}), "long action runs while still held")
+SetCommand(3100 + LEFT_HOLD_FCR, 1); tick(0.2)
 check(#presses_down() == 1, "releasing after a long press does nothing more")
 
 pressed = {}
-SetCommand(3001, 1); tick(0.1)             -- its release gets lost
-SetCommand(3001, 1); tick(0.1); SetCommand(3101, 1); tick(0.2)
-seq = presses_down()
-check(#seq == 1 and seq[1] == WPN, "a press after a lost release counts as a new short press")
+SetCommand(3000 + LEFT_HOLD_FCR, 1); tick(0.1)             -- its release gets lost
+SetCommand(3000 + LEFT_HOLD_FCR, 1); tick(0.1); SetCommand(3100 + LEFT_HOLD_FCR, 1); tick(0.2)
+check(same(presses_down(), {WPN}), "a press after a lost release counts as a new short press")
 
 pressed = {}
-SetCommand(3002, 1); SetCommand(3102, 1); tick(0.2)
-check(#pressed == 0, "unconfigured slot 2 presses nothing")
+short_press(RIGHT); short_press(RIGHT)
+check(same(presses_down(), {TSD, WPN}), "right MPD cycles TSD, WPN, on its own")
+check(pressed[1].device == devices.MFD_PLT_RIGHT, "presses go to the pilot's right MPD")
+
+pressed = {}
+SetCommand(3015, 1); SetCommand(3115, 1); tick(0.2)
+check(#pressed == 0, "unconfigured slot 15 presses nothing")
 
 check(#messages > 0, "messages shown on screen")
 
