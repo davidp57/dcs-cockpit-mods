@@ -1,56 +1,39 @@
 # DCS cockpit mods
 
-**Apache MPD cycles** : sur l'AH-64D de DCS World, un seul bouton du HOTAS fait défiler les pages d'un MPD, et un appui long va directement sur la page de ton choix.
-Plus besoin d'un bouton par page, ni de lâcher le manche pour cliquer sur l'écran.
+**Cockpit cycles** : dans DCS World, un seul bouton du HOTAS fait défiler plusieurs boutons du cockpit, par exemple les pages d'un écran, et un appui long va directement sur celui de ton choix.
+Plus besoin d'un bouton du HOTAS par page, ni de lâcher le manche pour cliquer sur l'écran.
+
+Avions pris en charge : **AH-64D** (les pages des deux MPD).
+D'autres avions s'ajoutent au même mod, chacun avec sa configuration.
 
 Ce dépôt contient aussi **l'accroche des mods de cockpit**, un petit paquet qui permet à plusieurs mods de cockpit de s'installer ensemble (ce mod-ci, le [rideau IFR](https://github.com/davidp57/dcs-ifr-curtain)…).
 
-## Ce que ça fait
+## Le principe
 
-Chaque MPD (gauche et droit) a son propre bouton.
-Un appui court affiche la page suivante :
+Un bouton du HOTAS, assigné à une commande des cycles, fait deux choses :
+
+- **un appui court** passe au bouton suivant du cycle, puis repart du premier une fois au bout ;
+- **un appui long** (bouton tenu une demi-seconde) va directement sur un bouton choisi, sans passer par les autres.
+
+L'action de l'appui long, tu la choisis une fois pour toutes en assignant la bonne commande dans DCS : chaque cycle existe en plusieurs variantes, une par cible d'appui long, plus une sans appui long.
+
+![Appui court : bouton suivant au relâchement. Appui long : le bouton choisi dès 0,5 s](docs/images/appui-long.svg)
+
+Avec un appui long, le bouton suivant ne part qu'au relâchement : le mod doit attendre de savoir si tu tiens le bouton.
+Dans la variante sans appui long, il part dès que tu appuies.
+
+## Avions pris en charge
+
+### AH-64D : les pages des MPD
+
+Chaque MPD (gauche et droit) a son propre cycle :
 
 ![Le cycle des pages : FCR, WPN, TSD, VID, A/C, puis FCR à nouveau](docs/images/cycle.svg)
 
 Ce sont toutes les pages qui ont leur propre bouton autour de l'écran, sauf COM.
+L'appui long va directement sur FCR, WPN, TSD ou VID.
 
-Un appui long (bouton tenu une demi-seconde) va directement sur une page, sans passer par les autres.
-Cette page, tu la choisis une fois pour toutes en assignant la bonne commande dans DCS (voir plus bas) : FCR, WPN, TSD ou VID.
-
-![Appui court : page suivante au relâchement. Appui long : la page choisie dès 0,5 s](docs/images/appui-long.svg)
-
-Le mod marche aux deux sièges : les boutons du pilote changent les MPD du pilote, ceux du tireur les MPD du tireur.
-
-## Installer
-
-Il faut [Open Mod Manager](https://github.com/iquercorb/OpenModMan), configuré pour DCS avec deux canaux : « Game files » (le dossier de DCS World) et « User files » (`Saved Games\DCS`).
-
-### 1. Récupérer les paquets
-
-| Paquet | Où le trouver | Canal |
-|---|---|---|
-| `Cockpit_Mods_Hook_v<version>.ozp` | [page Releases de ce dépôt](https://github.com/davidp57/dcs-cockpit-mods/releases) | Game files |
-| `Apache_MPD_Cycles_v<version>.ozp` | [page Releases de ce dépôt](https://github.com/davidp57/dcs-cockpit-mods/releases) | Game files |
-| `Quaggles_Injector` | [Quaggles' DCS Input Command Injector](https://github.com/Quaggles/dcs-input-command-injector) | Game files |
-| `Custom_Keybinds`, version du 2026-11-14 ou plus récente | commandes de [dcs-community-keybinds](https://github.com/davidp57/dcs-community-keybinds) | User files |
-
-Les deux premiers sont ce mod.
-L'injecteur de Quaggles permet d'ajouter des commandes à DCS sans toucher aux fichiers des modules ; Custom_Keybinds contient les commandes elles-mêmes (catégorie « MPD page cycles » de l'Apache), avec beaucoup d'autres commandes de la communauté.
-
-### 2. Les installer
-
-1. Ferme DCS.
-2. Si tu as le rideau IFR en version 1.x (paquet `IFR_Curtain_v1.x`), désinstalle-le d'abord : il remplace le même fichier de DCS que l'accroche. Sa version 2.0 passe par l'accroche, et s'installe après elle.
-3. Dans Open Mod Manager, installe les quatre paquets, chacun dans son canal.
-4. Lance DCS.
-
-### 3. Assigner les boutons
-
-1. Lance une mission en AH-64D.
-2. Échap > **Options** > **Commandes**.
-3. En haut, choisis **AH-64D Pilot** (ou **AH-64D CP/G** pour le siège tireur : les deux profils sont séparés, il faut assigner dans chacun).
-4. Dans la liste des catégories, choisis **MPD page cycles**.
-5. Assigne **une** commande au bouton du HOTAS du MPD gauche, et **une** au bouton du MPD droit, selon ce que tu veux faire de l'appui long :
+Dans Options > Commandes, catégorie **MPD page cycles**, chaque MPD a cinq commandes ; assigne-en **une** au bouton du MPD gauche et **une** au bouton du MPD droit :
 
 | Commande | Appui court | Appui long |
 |---|---|---|
@@ -62,8 +45,39 @@ L'injecteur de Quaggles permet d'ajouter des commandes à DCS sans toucher aux f
 
 Même chose avec « Right MPD » pour le MPD droit.
 
-Avec un appui long, la page suivante ne s'affiche qu'au relâchement du bouton : le mod doit attendre de savoir si tu le tiens.
-Si tu ne veux pas d'appui long, prends « next page » : la page change dès que tu appuies.
+Le mod marche aux deux sièges : les profils **AH-64D Pilot** et **AH-64D CP/G** sont séparés dans DCS, il faut assigner dans chacun.
+Les boutons du pilote changent les MPD du pilote, ceux du tireur les MPD du tireur.
+
+## Installer
+
+Il faut [Open Mod Manager](https://github.com/iquercorb/OpenModMan), configuré pour DCS avec deux canaux : « Game files » (le dossier de DCS World) et « User files » (`Saved Games\DCS`).
+
+### 1. Récupérer les paquets
+
+| Paquet | Où le trouver | Canal |
+|---|---|---|
+| `Cockpit_Mods_Hook_v<version>.ozp` | [page Releases de ce dépôt](https://github.com/davidp57/dcs-cockpit-mods/releases) | Game files |
+| `Cockpit_Cycles_v<version>.ozp` | [page Releases de ce dépôt](https://github.com/davidp57/dcs-cockpit-mods/releases) | Game files |
+| `Quaggles_Injector` | [Quaggles' DCS Input Command Injector](https://github.com/Quaggles/dcs-input-command-injector) | Game files |
+| `Custom_Keybinds`, version du 2026-11-14 ou plus récente | commandes de [dcs-community-keybinds](https://github.com/davidp57/dcs-community-keybinds) | User files |
+
+Les deux premiers sont ce mod.
+L'injecteur de Quaggles permet d'ajouter des commandes à DCS sans toucher aux fichiers des modules ; Custom_Keybinds contient les commandes elles-mêmes, avec beaucoup d'autres commandes de la communauté.
+
+### 2. Les installer
+
+1. Ferme DCS.
+2. Si tu as le rideau IFR en version 1.x (paquet `IFR_Curtain_v1.x`), désinstalle-le d'abord : il remplace le même fichier de DCS que l'accroche. Sa version 2.0 passe par l'accroche, et s'installe après elle.
+3. Dans Open Mod Manager, installe les quatre paquets, chacun dans son canal.
+4. Lance DCS.
+
+### 3. Assigner les boutons
+
+1. Lance une mission avec l'avion.
+2. Échap > **Options** > **Commandes**.
+3. En haut, choisis le profil de l'avion (pour l'AH-64D, **AH-64D Pilot** ou **AH-64D CP/G** selon le siège).
+4. Dans la liste des catégories, choisis celle des cycles de l'avion (pour l'AH-64D, **MPD page cycles**).
+5. Assigne les commandes à tes boutons du HOTAS, comme décrit dans la section de l'avion.
 
 ### Après une mise à jour de DCS
 
@@ -74,8 +88,8 @@ Si la mise à jour a changé ce fichier, il faut une nouvelle version du paquet 
 ## Bon à savoir
 
 - **Multijoueur** : le mod modifie des scripts de DCS, donc la vérification d'intégrité (IC) échoue. Il marche en solo et sur les serveurs qui ne vérifient pas les scripts.
-- **Le mod ne voit pas tes clics à la souris** : il retient seulement la dernière page qu'il a lui-même affichée. Après un changement de page à la souris, l'appui suivant peut donner une page inattendue ; le cycle se recale au tour suivant.
-- **Un appui long sur une page du cycle y replace le cycle** : après un appui long sur TSD, l'appui court suivant donne VID.
+- **Le mod ne voit pas tes clics à la souris** : il retient seulement le dernier bouton qu'il a lui-même appuyé. Après un changement de page à la souris, l'appui suivant peut donner une page inattendue ; le cycle se recale au tour suivant.
+- **Un appui long sur un bouton du cycle y replace le cycle** : sur l'AH-64D, après un appui long sur TSD, l'appui court suivant donne VID.
 - **Ce que fait chaque appui est écrit dans `Saved Games\DCS\Logs\dcs.log`**, lignes `COCKPIT_CYCLES` : c'est là qu'il faut regarder si un bouton ne fait rien.
 
 ## Pour les développeurs
@@ -107,9 +121,27 @@ Chaque mod s'abstient si le sien est déjà pris dans l'avion.
 
 ### Les cycles
 
-Le mod (`cycles/`) est un équipement Lua (`avLuaDevice`, numéro 251) qui reçoit des « slots » : 40 au plus, chacun avec une commande touche enfoncée (3000 + n) et une commande touche relâchée (3100 + n), ce qui permet de mesurer la durée de l'appui.
-`COCKPIT_CYCLES\config\AH-64D.lua` donne à chaque slot une action courte et une action longue : appuyer sur le bouton suivant d'un cycle, ou toujours sur le même bouton (puis le relâcher 0,1 s plus tard), comme le ferait un clic de souris (`performClickableAction`).
-Les slots d'un même MPD partagent la position de leur cycle.
+Le mod (`cycles/`) a deux couches :
+
+- **le moteur, commun à tous les avions** (`COCKPIT_CYCLES\device.lua`, `declare.lua`, `aircraft.lua`) : appui court et appui long, position dans les cycles, relâchement des boutons ;
+- **une configuration par avion** (`COCKPIT_CYCLES\config\<avion>.lua`), choisie par `aircraft.lua` d'après le chemin des scripts de cockpit du module, et les commandes de l'avion dans dcs-community-keybinds.
+
+Le moteur est un équipement Lua (`avLuaDevice`, numéro 251) qui reçoit des « slots » : 40 au plus, chacun avec une commande touche enfoncée (3000 + n) et une commande touche relâchée (3100 + n), ce qui permet de mesurer la durée de l'appui.
+La configuration de l'avion donne à chaque slot une action courte et une action longue : appuyer sur le bouton suivant d'un cycle, ou toujours sur le même bouton (puis le relâcher 0,1 s plus tard), comme le ferait un clic de souris (`performClickableAction`).
+Des slots qui reçoivent le même cycle partagent sa position.
+
+Réglages d'un fichier de configuration : `long_press` (seuil de l'appui long, en secondes), `release_after` (délai avant de relâcher le bouton du cockpit), `show_messages` (`true` affiche aussi chaque appui à l'écran, utile pour régler un nouvel avion).
+
+#### Ajouter un avion
+
+1. Une ligne dans `COCKPIT_CYCLES\aircraft.lua` : un morceau du chemin des scripts de cockpit du module (`AH-64D` pour `Mods\aircraft\AH-64D\Cockpit\Scripts\`) et le nom de son fichier de configuration.
+2. `COCKPIT_CYCLES\config\<avion>.lua`, sur le modèle de celui de l'AH-64D : les boutons du cockpit se trouvent dans `Mods\aircraft\<avion>\Cockpit\Scripts\clickabledata.lua` (équipement et commande de chaque bouton cliquable).
+3. Les commandes de ses slots dans les fichiers de l'avion de dcs-community-keybinds, dans une catégorie à lui.
+4. Une section dans ce README, sous « Avions pris en charge ».
+
+Les numéros de slots sont propres à chaque avion : deux avions peuvent utiliser les mêmes.
+
+#### AH-64D
 
 Aucune fonction Lua du cockpit ne dit quel siège est occupé (aucune trouvée dans les scripts de DCS le 2026-11-14).
 Les commandes du tireur ont donc leurs propres numéros, envoyés par les fichiers de commandes du tireur, et c'est à ce numéro que le mod reconnaît le siège :
@@ -122,11 +154,6 @@ Les commandes du tireur ont donc leurs propres numéros, envoyés par les fichie
 Dans chaque MPD : « next page », puis « hold FCR », « WPN », « TSD », « VID ».
 Ces numéros ne doivent jamais changer : DCS enregistre les assignations des pilotes sous le numéro de la commande, et une renumérotation les ferait pointer ailleurs sans prévenir.
 Les slots 6, 7, 13 et 14 (appuis longs COM et A/C, retirés) restent libres pour cette raison.
-
-Réglages du fichier de configuration : `long_press` (seuil de l'appui long, en secondes), `release_after` (délai avant de relâcher le bouton du cockpit), `show_messages` (`true` affiche aussi chaque appui à l'écran, utile pour régler un nouvel avion).
-
-Le mécanisme ne dépend pas de l'Apache.
-Pour un autre avion (un F-16, par exemple), on ajouterait une ligne à `COCKPIT_CYCLES\aircraft.lua`, un `config\<avion>.lua` sur le modèle de celui de l'Apache (boutons trouvés dans `Mods\aircraft\<avion>\Cockpit\Scripts\clickabledata.lua`), et ses commandes dans dcs-community-keybinds.
 
 ### Construire les paquets
 

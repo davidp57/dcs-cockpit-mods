@@ -6,8 +6,8 @@ Two packages:
   added, since Open Mod Manager can only replace whole files (it backs up the original and
   puts it back on uninstall). The kneeboard file is taken from the DCS install given, so the
   package matches that DCS version: rebuild it after a DCS update that changes the file.
-- cycles: Apache_MPD_Cycles_v<version>.ozp, the AH-64D MPD page cycles. It needs the hook
-  package.
+- cycles: Cockpit_Cycles_v<version>.ozp, the cockpit cycles, with one config per aircraft
+  (AH-64D so far). It needs the hook package.
 
 Each package also holds modpack.xml and readme.md, as Open Mod Manager expects.
 
@@ -42,7 +42,7 @@ PACKAGES = {
         "name": "Cockpit_Mods_Hook",
         "source": REPO / "hook" / "mod",
         "kneeboard": True,
-        "description": """Accroche partagée des mods de cockpit (rideau IFR, cycles de pages des MPD de l'Apache…) : permet à plusieurs mods de déclarer leurs équipements sans remplacer chacun le même fichier de DCS.
+        "description": """Accroche partagée des mods de cockpit (rideau IFR, cycles de cockpit…) : permet à plusieurs mods de déclarer leurs équipements sans remplacer chacun le même fichier de DCS.
 
 Seul, ce paquet ne fait rien ; il est demandé par les mods qui s'en servent.
 
@@ -60,22 +60,32 @@ Plusieurs mods peuvent ainsi ajouter leurs équipements, alors qu'Open Mod Manag
 """,
     },
     "cycles": {
-        "name": "Apache_MPD_Cycles",
+        "name": "Cockpit_Cycles",
         "source": REPO / "cycles" / "mod",
         "kneeboard": False,
-        "description": """AH-64D : un seul bouton du HOTAS fait défiler les pages d'un MPD (FCR, WPN, TSD, VID, A/C), et un appui long peut aller directement sur une page choisie (FCR, WPN, TSD ou VID).
+        "description": """Cycles de cockpit : un seul bouton du HOTAS fait défiler plusieurs boutons du cockpit (les pages d'un écran, par exemple), et un appui long peut aller directement sur l'un d'eux.
 
-Demande le paquet Cockpit_Mods_Hook (« game files »). Touches (catégorie « MPD page cycles ») : fournies par Custom_Keybinds (« user files »), avec Quaggles Injector (« game files »). Ne passe pas l'IC.""",
-        "readme": """# Apache MPD cycles
+Avions pris en charge : AH-64D (pages des deux MPD : FCR, WPN, TSD, VID, A/C ; appui long sur FCR, WPN, TSD ou VID).
 
-AH-64D : un seul bouton du HOTAS fait défiler les pages d'un MPD.
+Demande le paquet Cockpit_Mods_Hook (« game files »). Touches : fournies par Custom_Keybinds (« user files »), avec Quaggles Injector (« game files »). Ne passe pas l'IC.
 
-- Les deux MPD : FCR, puis WPN, puis TSD, puis VID, puis A/C, puis FCR…
-- Cinq commandes par MPD, catégorie « MPD page cycles » : « Left MPD: next page » (la page change dès l'appui), et « Left MPD: next page, hold FCR » (ou WPN, TSD, VID) où un appui long (0,5 s) va directement sur cette page. Même chose pour « Right MPD ».
-- On choisit sa page d'accès direct en assignant la commande correspondante, sans fichier à modifier.
+Source et documentation : https://github.com/davidp57/dcs-cockpit-mods""",
+        "readme": """# Cockpit cycles
+
+Un seul bouton du HOTAS fait défiler plusieurs boutons du cockpit (les pages d'un écran, par exemple), et un appui long (0,5 s) peut aller directement sur l'un d'eux.
+
+Avions pris en charge :
+
+- AH-64D, catégorie « MPD page cycles » : chaque MPD fait défiler FCR, WPN, TSD, VID, A/C. Cinq commandes par MPD : « Left MPD: next page » (la page change dès l'appui), et « Left MPD: next page, hold FCR » (ou WPN, TSD, VID) où un appui long va directement sur cette page. Même chose pour « Right MPD ». Pilote et tireur.
+
+Pour tous :
+
+- On choisit l'action de l'appui long en assignant la commande correspondante, sans fichier à modifier.
 - Demande le paquet Cockpit_Mods_Hook ; commandes fournies par le paquet Custom_Keybinds avec Quaggles Injector.
 - Chaque appui est écrit dans `dcs.log`, lignes `COCKPIT_CYCLES`.
 - Ne passe pas l'IC : solo et serveurs qui ne vérifient pas les scripts.
+
+Source et documentation : https://github.com/davidp57/dcs-cockpit-mods
 """,
     },
 }
