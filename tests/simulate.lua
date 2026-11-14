@@ -170,7 +170,7 @@ check(#pressed == 0, "dropped slot 6 presses nothing")
 long_press(11)
 check(same(presses_down(), {TSD}) and pressed[1].device == devices.MFD_PLT_RIGHT, "slot 11 is still right MPD, hold TSD (bindings kept)")
 
-check(#messages > 0, "messages shown on screen")
+check(#messages == 0, "no message on screen (show_messages = false)")
 
 print(failures == 0 and "ALL OK" or (failures.." FAILURE(S)"))
 os.exit(failures == 0 and 0 or 1)

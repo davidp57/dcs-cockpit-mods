@@ -52,7 +52,8 @@ Avec un appui long, l'appui court ne part qu'au relâchement, puisque le mod doi
 Les cinq commandes d'un MPD partagent la même position dans le cycle, et un appui long y replace le cycle : après « hold TSD », l'appui court suivant donne VID.
 Le mod ne voit pas les boutons appuyés à la souris ni les pages changées autrement : il ne retient que son propre dernier appui.
 
-Chaque appui est écrit dans `dcs.log`, lignes `COCKPIT_CYCLES`, avec l'équipement et la commande visés ; pendant la mise au point, il s'affiche aussi à l'écran (`show_messages` dans `config/AH-64D.lua`).
+Chaque appui est écrit dans `dcs.log`, lignes `COCKPIT_CYCLES`, avec l'équipement et la commande visés .
+Pour l'afficher aussi à l'écran (utile pour régler un nouvel avion), mettre `show_messages = true` dans `config/AH-64D.lua`.
 
 ### Pilote et tireur
 

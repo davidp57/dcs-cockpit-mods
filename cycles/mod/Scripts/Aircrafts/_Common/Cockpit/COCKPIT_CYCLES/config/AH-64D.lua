@@ -69,7 +69,7 @@ end
 return {
 	description = "pilot commands on the pilot's MPDs, gunner commands on the gunner's",
 	long_press = 0.5,
-	-- On screen while trying it out; set to false once settled.
-	show_messages = true,
+	-- true shows each press on screen (dcs.log always has it); settled in game on 2026-11-14.
+	show_messages = false,
 	slots = slots,
 }
