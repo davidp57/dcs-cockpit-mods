@@ -1,0 +1,134 @@
+"""Builds the Open Mod Manager packages of this repository, for the "Game files" channel.
+
+Two packages:
+- hook: Cockpit_Mods_Hook_v<version>.ozp, the shared hook. It holds COCKPIT_MODS/_loader.lua
+  and a full copy of the DCS file KNEEBOARD/declare_kneeboard_device.lua with one line
+  added, since Open Mod Manager can only replace whole files (it backs up the original and
+  puts it back on uninstall). The kneeboard file is taken from the DCS install given, so the
+  package matches that DCS version: rebuild it after a DCS update that changes the file.
+- cycles: Cockpit_Cycles_v<version>.ozp, the cycles mod. It needs the hook package.
+
+Each package also holds modpack.xml and readme.md, as Open Mod Manager expects.
+
+Usage: python tools/build_omm.py hook|cycles VERSION [DCS path] [output folder]
+       python tools/build_omm.py hook 1.0.0 "C:/jeux/DCS World" dist
+"""
+
+import re
+import sys
+import zipfile
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parent.parent
+COCKPIT = Path("Scripts/Aircrafts/_Common/Cockpit")
+KNEEBOARD = COCKPIT / "KNEEBOARD" / "declare_kneeboard_device.lua"
+
+# The line added to the kneeboard file. pcall: a missing or broken hook must not take the
+# module's other devices down with it.
+HOOK_LINE = (
+    'do local ok, err = pcall(dofile, LockOn_Options.common_script_path.."COCKPIT_MODS/_loader.lua") '
+    'if not ok then print("COCKPIT_MODS: hook failed: "..tostring(err)) end end'
+)
+MARKER = "COCKPIT-MODS"
+# Blocks left in the kneeboard file by development installs, stripped from the copy.
+DEV_MARKERS = (MARKER, "IFR-CURTAIN")
+
+CATEGORY = "COMMUN - Amélioration"
+
+PACKAGES = {
+    "hook": {
+        "name": "Cockpit_Mods_Hook",
+        "source": REPO / "hook" / "mod",
+        "kneeboard": True,
+        "description": """Accroche partagée des mods de cockpit (rideau IFR, cycles de commandes…) : permet à plusieurs mods de déclarer leurs équipements sans remplacer chacun le même fichier de DCS.
+
+Seul, ce paquet ne fait rien ; il est demandé par les mods qui s'en servent.
+
+Remplace Scripts\\Aircrafts\\_Common\\Cockpit\\KNEEBOARD\\declare_kneeboard_device.lua (une ligne ajoutée) : à reconstruire si une mise à jour de DCS modifie ce fichier. Ne passe pas l'IC.""",
+        "readme": """# Cockpit mods hook
+
+Accroche partagée des mods de cockpit pour DCS World.
+Elle ajoute une ligne au fichier du kneeboard, chargé par la plupart des modules, qui lit le dossier `Scripts\\Aircrafts\\_Common\\Cockpit\\COCKPIT_MODS` : chaque mod y dépose son fichier de déclaration.
+Plusieurs mods peuvent ainsi ajouter leurs équipements, alors qu'Open Mod Manager ne laisse qu'un paquet remplacer le fichier du kneeboard.
+
+- Seule, elle ne fait rien.
+- Remplace `declare_kneeboard_device.lua` (une ligne ajoutée) : à reconstruire si une mise à jour de DCS modifie ce fichier.
+- Ne passe pas l'IC : solo et serveurs qui ne vérifient pas les scripts.
+- Ce qu'elle charge est écrit dans `dcs.log`, lignes `COCKPIT_MODS`.
+""",
+    },
+    "cycles": {
+        "name": "Cockpit_Cycles",
+        "source": REPO / "cycles" / "mod",
+        "kneeboard": False,
+        "description": """Cycles de commandes : un seul bouton du HOTAS fait défiler plusieurs boutons du cockpit (par exemple les pages FCR, WPN et TSD du MPD gauche de l'AH-64D), avec une action différente pour un appui long.
+
+Avions configurés : AH-64D.
+
+Demande le paquet Cockpit_Mods_Hook (« game files »). Touches (catégorie « Cockpit cycles ») : fournies par Custom_Keybinds (« user files »), avec Quaggles Injector (« game files »). Ne passe pas l'IC.""",
+        "readme": """# Cockpit cycles
+
+Cycles de commandes pour DCS World : un seul bouton du HOTAS fait défiler plusieurs boutons du cockpit, avec une action différente pour un appui long (0,5 s par défaut).
+
+- Avions configurés : AH-64D (MPD gauche : appui court FCR → WPN → TSD → FCR…, appui long FCR).
+- Demande le paquet Cockpit_Mods_Hook.
+- Touches : « Cockpit cycles: slot 1 » à « slot 8 », catégorie « Cockpit cycles », fournies par le paquet Custom_Keybinds avec Quaggles Injector.
+- Ce que fait chaque appui est écrit dans `dcs.log`, lignes `COCKPIT_CYCLES`.
+- Ne passe pas l'IC : solo et serveurs qui ne vérifient pas les scripts.
+""",
+    },
+}
+
+
+def pristine_kneeboard(dcs: Path) -> str:
+    """The DCS kneeboard declaration, without any block left by a development install."""
+    text = (dcs / KNEEBOARD).read_bytes().decode("utf-8")
+    for marker in DEV_MARKERS:
+        text = re.sub(rf"(?ms)^[ \t]*-- {marker} BEGIN.*?-- {marker} END[ \t]*(\r?\n|\Z)", "", text)
+    return text
+
+
+def hooked_kneeboard(text: str) -> str:
+    nl = "\r\n" if "\r\n" in text else "\n"
+    if not text.endswith("\n"):
+        text += nl
+    return text + f"-- {MARKER} BEGIN{nl}{HOOK_LINE}{nl}-- {MARKER} END{nl}"
+
+
+def main():
+    if len(sys.argv) < 3 or sys.argv[1] not in PACKAGES:
+        sys.exit(__doc__)
+    package_info = PACKAGES[sys.argv[1]]
+    version = sys.argv[2]
+    dcs = Path(sys.argv[3]) if len(sys.argv) > 3 else Path("C:/jeux/DCS World")
+    out_dir = Path(sys.argv[4]) if len(sys.argv) > 4 else REPO / "dist"
+
+    name = f"{package_info['name']}_v{version}"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    package = out_dir / f"{name}.ozp"
+
+    modpack = (
+        "<Open_Mod_Manager_Package>\n"
+        f"\t<install>{name}</install>\n"
+        f"\t<category>{CATEGORY}</category>\n"
+        f"\t<description>{package_info['description']}</description>\n"
+        "</Open_Mod_Manager_Package>\n"
+    )
+    source = package_info["source"]
+    with zipfile.ZipFile(package, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("modpack.xml", modpack.encode("utf-8"))
+        z.writestr("readme.md", package_info["readme"].encode("utf-8"))
+        for f in sorted(source.rglob("*")):
+            if f.is_file():
+                z.write(f, f"{name}/{f.relative_to(source).as_posix()}")
+        if package_info["kneeboard"]:
+            z.writestr(f"{name}/{KNEEBOARD.as_posix()}", hooked_kneeboard(pristine_kneeboard(dcs)).encode("utf-8"))
+
+    print(f"Written: {package}")
+    with zipfile.ZipFile(package) as z:
+        for n in z.namelist():
+            print("  ", n)
+
+
+if __name__ == "__main__":
+    main()
