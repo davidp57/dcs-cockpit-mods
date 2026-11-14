@@ -5,7 +5,7 @@
     </marker>
   </defs>
   <rect x="0" y="0" width="760" height="300" rx="14" fill="#f6f8fa"/>
-  <text x="380" y="34" text-anchor="middle" font-size="18" font-weight="600" fill="#1f2933">Appui court ou appui long, sur un bouton « … hold TSD »</text>
+  <text x="380" y="34" text-anchor="middle" font-size="18" font-weight="600" fill="#1f2933">Exemple AH-64D : appui court ou appui long, sur « … hold TSD »</text>
 
   <!-- time axis -->
   <line x1="190" y1="250" x2="720" y2="250" stroke="#3b4a5a" stroke-width="2" marker-end="url(#tip)"/>
