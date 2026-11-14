@@ -152,6 +152,18 @@ short_press(RIGHT); short_press(RIGHT)
 check(same(presses_down(), {FCR, WPN}), "right MPD cycles FCR, WPN, on its own")
 check(pressed[1].device == devices.MFD_PLT_RIGHT, "presses go to the pilot's right MPD")
 
+-- Gunner: slots 21-25 left MPD, 28-32 right MPD, on the gunner's MPDs.
+pressed = {}
+short_press(21); short_press(21)
+check(same(presses_down(), {FCR, WPN}) and pressed[1].device == devices.MFD_CPG_LEFT, "gunner left MPD cycles on the gunner's left MPD")
+pressed = {}
+long_press(32)
+check(same(presses_down(), {VID}) and pressed[1].device == devices.MFD_CPG_RIGHT, "gunner right MPD, hold VID, on the gunner's right MPD")
+pressed = {}
+short_press(LEFT)
+check(pressed[1].device == devices.MFD_PLT_LEFT, "the pilot's commands still press the pilot's MPD")
+check(listened[3040] and listened[3140], "slots up to 40 listened")
+
 pressed = {}
 SetCommand(3006, 1); SetCommand(3106, 1); tick(0.2)
 check(#pressed == 0, "dropped slot 6 presses nothing")

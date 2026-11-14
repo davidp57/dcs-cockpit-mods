@@ -15,9 +15,9 @@
 -- The aircraft's buttons and slots are in config/<file>.lua, chosen by aircraft.lua.
 -- Everything the device does is written to dcs.log, lines COCKPIT_CYCLES.
 
-local SLOT_COUNT  = 16
+local SLOT_COUNT  = 40
 local CMD_DOWN    = 3000 -- slot n pressed: CMD_DOWN + n
-local CMD_UP      = 3100 -- slot n released: CMD_UP + n
+local CMD_UP      = 3100 -- slot n released: CMD_UP + n (SLOT_COUNT must stay under 100)
 -- Seconds of model time between two update() calls. Durations are counted in model time:
 -- under time acceleration, a long press is shorter in real time.
 local UPDATE_STEP = 0.02

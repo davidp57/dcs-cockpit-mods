@@ -54,24 +54,19 @@ Le mod ne voit pas les boutons appuyés à la souris ni les pages changées autr
 
 Chaque appui est écrit dans `dcs.log`, lignes `COCKPIT_CYCLES`, avec l'équipement et la commande visés ; pendant la mise au point, il s'affiche aussi à l'écran (`show_messages` dans `config/AH-64D.lua`).
 
-### Quel équipement reçoit l'appui
+### Pilote et tireur
 
-L'Apache a deux sièges, et deux façons d'appuyer sur un bouton de MPD depuis Lua.
-Le choix se fait par `TARGET`, en tête de `COCKPIT_CYCLES\config\AH-64D.lua` :
+Les assignations se font dans chaque profil : « AH-64D Pilot » et « AH-64D CP/G » sont séparés dans Options > Commandes, et les commandes ont les mêmes noms dans les deux.
+Les commandes du pilote changent les MPD du pilote, celles du tireur les MPD du tireur, comme le ferait un clic de souris sur l'écran (`performClickableAction`).
 
-| `TARGET` | Équipement | Comment | Siège |
-|---|---|---|---|
-| `PLT` (par défaut) | MPD du pilote (`MFD_PLT_LEFT`, `MFD_PLT_RIGHT`) | comme un clic de souris (`performClickableAction`) | toujours les MPD du pilote |
-| `CPG` | MPD du tireur (`MFD_CPG_LEFT`, `MFD_CPG_RIGHT`) | idem | toujours les MPD du tireur |
-| `INPUT` | l'équipement des touches d'ED « Left/Right MPD Pushbutton » (`MFD_INPUT_LEFT`, `MFD_INPUT_RIGHT`) | comme ces touches (`SetCommand`) | peut-être celui du siège occupé, ce qui servirait aux deux |
-
-Reste à trancher en jeu lequel fonctionne, et pour le tireur.
+Aucune fonction Lua du cockpit ne dit quel siège est occupé (aucune trouvée dans les scripts de DCS le 2026-11-14).
+Les commandes du tireur ont donc leurs propres numéros, envoyés par les fichiers de commandes du tireur, et c'est à ce numéro que le mod reconnaît le siège.
 
 ### Comment c'est fait
 
-Le mod est un équipement Lua (`avLuaDevice`, numéro 251) qui reçoit des « slots » : 16 au plus, chacun avec une commande touche enfoncée (3000 + n) et une commande touche relâchée (3100 + n), ce qui permet de mesurer la durée de l'appui.
+Le mod est un équipement Lua (`avLuaDevice`, numéro 251) qui reçoit des « slots » : 40 au plus, chacun avec une commande touche enfoncée (3000 + n) et une commande touche relâchée (3100 + n), ce qui permet de mesurer la durée de l'appui.
 `config/AH-64D.lua` donne à chaque slot une action courte et une action longue : appuyer sur le bouton suivant d'un cycle, ou toujours sur le même bouton (puis le relâcher 0,1 s plus tard).
-Les slots 1 à 5 sont le MPD gauche, 8 à 12 le MPD droit, dans l'ordre des commandes ajoutées à dcs-community-keybinds.
+Pour le pilote, les slots 1 à 5 sont le MPD gauche, 8 à 12 le MPD droit ; pour le tireur, 21 à 25 et 28 à 32 ; dans l'ordre des commandes ajoutées à dcs-community-keybinds.
 Ces numéros ne doivent jamais changer : DCS enregistre les assignations des pilotes sous le numéro de la commande, et une renumérotation les ferait pointer ailleurs sans prévenir.
 Les slots 6, 7, 13 et 14 (appuis longs COM et A/C, retirés) restent libres pour cette raison.
 
@@ -136,7 +131,8 @@ Il demande le Lua 5.1 de ZeroBrane Studio (`-Lua` pour un autre) et les scripts 
 & "D:\dev\_dcs-other\dcs-cockpit-mods\tests\run.ps1"
 ```
 
-Il ne dit rien de ce que DCS accepte vraiment : `lfs` dans `device_init.lua`, l'équipement qui réagit à l'appui, le siège du tireur se vérifient en jeu.
+Il ne dit rien de ce que DCS accepte vraiment, qui se vérifie en jeu.
+Vérifié le 2026-11-14 : `lfs` est disponible dans `device_init.lua`, et le clic sur les MPD du pilote marche.
 
 ## Limites
 
