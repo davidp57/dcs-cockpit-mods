@@ -63,15 +63,15 @@ Plusieurs mods peuvent ainsi ajouter leurs équipements, alors qu'Open Mod Manag
         "name": "Apache_MPD_Cycles",
         "source": REPO / "cycles" / "mod",
         "kneeboard": False,
-        "description": """AH-64D : un seul bouton du HOTAS fait défiler les pages d'un MPD (gauche : FCR, WPN, TSD ; droit : TSD, WPN, FCR), et un appui long peut aller directement sur une page choisie (FCR, WPN, TSD, VID, COM ou A/C).
+        "description": """AH-64D : un seul bouton du HOTAS fait défiler les pages d'un MPD (FCR, WPN, TSD, VID, A/C), et un appui long peut aller directement sur une page choisie (FCR, WPN, TSD ou VID).
 
 Demande le paquet Cockpit_Mods_Hook (« game files »). Touches (catégorie « MPD page cycles ») : fournies par Custom_Keybinds (« user files »), avec Quaggles Injector (« game files »). Ne passe pas l'IC.""",
         "readme": """# Apache MPD cycles
 
 AH-64D : un seul bouton du HOTAS fait défiler les pages d'un MPD.
 
-- MPD gauche : FCR, puis WPN, puis TSD, puis FCR… ; MPD droit : TSD, puis WPN, puis FCR, puis TSD…
-- Sept commandes par MPD, catégorie « MPD page cycles » : « Left MPD: next page » (la page change dès l'appui), et « Left MPD: next page, hold FCR » (ou WPN, TSD, VID, COM, A/C) où un appui long (0,5 s) va directement sur cette page. Même chose pour « Right MPD ».
+- Les deux MPD : FCR, puis WPN, puis TSD, puis VID, puis A/C, puis FCR…
+- Cinq commandes par MPD, catégorie « MPD page cycles » : « Left MPD: next page » (la page change dès l'appui), et « Left MPD: next page, hold FCR » (ou WPN, TSD, VID) où un appui long (0,5 s) va directement sur cette page. Même chose pour « Right MPD ».
 - On choisit sa page d'accès direct en assignant la commande correspondante, sans fichier à modifier.
 - Demande le paquet Cockpit_Mods_Hook ; commandes fournies par le paquet Custom_Keybinds avec Quaggles Injector.
 - Chaque appui est écrit dans `dcs.log`, lignes `COCKPIT_CYCLES`.

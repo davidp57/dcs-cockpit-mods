@@ -1,14 +1,13 @@
 -- Cockpit cycles, AH-64D: page cycles of the two MPDs, for both seats.
 -- Run by device.lua, inside the cycles device. Returns the settings and the slots.
 --
--- Each MPD has seven commands, all stepping through the same page cycle on a short press:
---   left MPD:  FCR > WPN > TSD > FCR...
---   right MPD: TSD > WPN > FCR > TSD...
+-- Each MPD has five commands, all stepping through the same page cycle on a short press:
+--   FCR > WPN > TSD > VID > A/C > FCR... (every page with its own button, except COM)
 -- They differ only by what a long press does: nothing (the page then changes as soon as the
--- key is pressed), or go straight to one page (FCR, WPN, TSD, VID, COM or A/C). The pilot
--- picks one of them in Options > Controls; the commands of an MPD share their cycle position.
+-- key is pressed), or go straight to FCR, WPN, TSD or VID. The pilot picks one of them in
+-- Options > Controls; the commands of an MPD share their cycle position.
 -- Slots, in the order of the Custom_Keybinds commands (dcs-community-keybinds):
---   1-7 left MPD, 8-14 right MPD; in each: no hold, then hold FCR, WPN, TSD, VID, COM, A/C.
+--   1-5 left MPD, 8-12 right MPD; in each: no hold, then hold FCR, WPN, TSD, VID.
 
 dofile(LockOn_Options.script_path.."devices.lua")      -- devices.*
 dofile(LockOn_Options.script_path.."command_defs.lua") -- mpd_commands.*
@@ -38,42 +37,44 @@ local MPDS = {
 	},
 }
 
--- Page buttons, in the order of the long press commands.
+-- Page buttons of an MPD.
 local PAGES = {
-	{name = "FCR", command = mpd_commands.FCR},
-	{name = "WPN", command = mpd_commands.WPN},
-	{name = "TSD", command = mpd_commands.TSD},
-	{name = "VID", command = mpd_commands.VID},
-	{name = "COM", command = mpd_commands.COM},
-	{name = "A/C", command = mpd_commands.AC},
+	FCR = mpd_commands.FCR,
+	WPN = mpd_commands.WPN,
+	TSD = mpd_commands.TSD,
+	VID = mpd_commands.VID,
+	["A/C"] = mpd_commands.AC,
 }
 
-local CYCLES = {
-	left  = {"FCR", "WPN", "TSD"},
-	right = {"TSD", "WPN", "FCR"},
-}
+-- Short press, both MPDs.
+local CYCLE = {"FCR", "WPN", "TSD", "VID", "A/C"}
+
+-- Long press, in the order of the commands.
+local HOLD = {"FCR", "WPN", "TSD", "VID"}
 
 local slots = {}
 
--- Adds the seven slots of one MPD, from slot number first.
+-- Adds the slots of one MPD, from slot number first.
 local function add_mpd(side, first)
 	local mpd = MPDS[TARGET][side]
 	local buttons = {}
-	for _, page in ipairs(PAGES) do
-		buttons[page.name] = {device = mpd.device, command = page.command, method = mpd.method, label = mpd.name.." "..page.name}
+	for name, command in pairs(PAGES) do
+		buttons[name] = {device = mpd.device, command = command, method = mpd.method, label = mpd.name.." "..name}
 	end
-	-- One action table for all seven slots: they share the cycle position.
+	-- One action table for all the slots of the MPD: they share the cycle position.
 	local cycle = {}
-	for _, name in ipairs(CYCLES[side]) do
+	for _, name in ipairs(CYCLE) do
 		cycle[#cycle + 1] = buttons[name]
 	end
 	local next_page = {cycle = cycle}
 	slots[first] = {short = next_page}
-	for i, page in ipairs(PAGES) do
-		slots[first + i] = {short = next_page, long = {press = buttons[page.name]}}
+	for i, name in ipairs(HOLD) do
+		slots[first + i] = {short = next_page, long = {press = buttons[name]}}
 	end
 end
 
+-- Slot numbers are the command numbers DCS keeps the pilots' bindings under: never renumber.
+-- 6-7 and 13-14 were long presses on COM and A/C, dropped on 2026-11-14.
 add_mpd("left", 1)
 add_mpd("right", 8)
 

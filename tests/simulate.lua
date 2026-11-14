@@ -91,10 +91,10 @@ end
 -- Commands of the MPDs, from the aircraft's own files.
 dofile(aircraft_scripts.."devices.lua")
 dofile(aircraft_scripts.."command_defs.lua")
-local FCR, WPN, TSD, VID = mpd_commands.FCR, mpd_commands.WPN, mpd_commands.TSD, mpd_commands.VID
+local FCR, WPN, TSD, VID, AC = mpd_commands.FCR, mpd_commands.WPN, mpd_commands.TSD, mpd_commands.VID, mpd_commands.AC
 
--- Slots of config/AH-64D.lua: 1-7 left MPD, 8-14 right MPD; in each, no hold, then hold
--- FCR, WPN, TSD, VID, COM, A/C.
+-- Slots of config/AH-64D.lua: 1-5 left MPD, 8-12 right MPD; in each, no hold, then hold
+-- FCR, WPN, TSD, VID.
 local LEFT, LEFT_HOLD_FCR, LEFT_HOLD_TSD, LEFT_HOLD_VID, RIGHT = 1, 2, 4, 5, 8
 
 local function short_press(slot)
@@ -113,26 +113,28 @@ end
 SetCommand(3000 + LEFT, 1)
 check(same(presses_down(), {FCR}), "no-hold command presses at once, before the release")
 SetCommand(3100 + LEFT, 1); tick(0.2)
-short_press(LEFT); short_press(LEFT); short_press(LEFT)
-check(same(presses_down(), {FCR, WPN, TSD, FCR}), "left MPD cycles FCR, WPN, TSD, FCR")
+short_press(LEFT); short_press(LEFT); short_press(LEFT); short_press(LEFT); short_press(LEFT)
+check(same(presses_down(), {FCR, WPN, TSD, VID, AC, FCR}), "left MPD cycles FCR, WPN, TSD, VID, A/C, FCR")
 check(pressed[1].device == devices.MFD_PLT_LEFT and pressed[1].method == "click", "presses go to the pilot's left MPD as clicks")
 local releases = 0
 for _, p in ipairs(pressed) do if p.value == 0 then releases = releases + 1 end end
-check(releases == 4, "each press is released")
+check(releases == 6, "each press is released")
 
 pressed = {}
-short_press(LEFT_HOLD_TSD) -- WPN: the seven left commands share the cycle
+short_press(LEFT_HOLD_TSD) -- WPN: the five left commands share the cycle
 check(same(presses_down(), {WPN}), "commands of one MPD share the cycle position")
 
 pressed = {}
 long_press(LEFT_HOLD_TSD)  -- TSD, and the cycle follows
-short_press(LEFT)          -- FCR
-check(same(presses_down(), {TSD, FCR}), "hold TSD goes to TSD, next short press gives FCR")
+short_press(LEFT)          -- VID
+check(same(presses_down(), {TSD, VID}), "hold TSD goes to TSD, next short press gives VID")
 
 pressed = {}
-long_press(LEFT_HOLD_VID)  -- VID, not in the cycle: the cycle stays where it was
-short_press(LEFT)          -- WPN
-check(same(presses_down(), {VID, WPN}), "hold VID goes to VID, the cycle goes on")
+long_press(LEFT_HOLD_FCR)  -- FCR
+short_press(LEFT_HOLD_VID) -- WPN
+long_press(LEFT_HOLD_VID)  -- VID
+short_press(LEFT)          -- A/C
+check(same(presses_down(), {FCR, WPN, VID, AC}), "hold FCR and hold VID, the cycle follows each")
 
 pressed = {}
 SetCommand(3000 + LEFT_HOLD_FCR, 1); tick(0.6)
@@ -147,12 +149,14 @@ check(same(presses_down(), {WPN}), "a press after a lost release counts as a new
 
 pressed = {}
 short_press(RIGHT); short_press(RIGHT)
-check(same(presses_down(), {TSD, WPN}), "right MPD cycles TSD, WPN, on its own")
+check(same(presses_down(), {FCR, WPN}), "right MPD cycles FCR, WPN, on its own")
 check(pressed[1].device == devices.MFD_PLT_RIGHT, "presses go to the pilot's right MPD")
 
 pressed = {}
-SetCommand(3015, 1); SetCommand(3115, 1); tick(0.2)
-check(#pressed == 0, "unconfigured slot 15 presses nothing")
+SetCommand(3006, 1); SetCommand(3106, 1); tick(0.2)
+check(#pressed == 0, "dropped slot 6 presses nothing")
+long_press(11)
+check(same(presses_down(), {TSD}) and pressed[1].device == devices.MFD_PLT_RIGHT, "slot 11 is still right MPD, hold TSD (bindings kept)")
 
 check(#messages > 0, "messages shown on screen")
 

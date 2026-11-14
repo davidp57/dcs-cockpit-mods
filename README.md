@@ -34,13 +34,9 @@ Chaque mod s'abstient si le sien est déjà pris dans l'avion.
 
 ## Les cycles de pages des MPD (AH-64D)
 
-Chaque MPD a sept commandes, dans Options > Commandes de l'AH-64D (pilote et tireur), catégorie « MPD page cycles ».
-Toutes font défiler les pages du MPD sur un appui court :
-
-| MPD | Appui court |
-|---|---|
-| gauche | FCR, puis WPN, puis TSD, puis FCR… |
-| droit | TSD, puis WPN, puis FCR, puis TSD… |
+Chaque MPD a cinq commandes, dans Options > Commandes de l'AH-64D (pilote et tireur), catégorie « MPD page cycles ».
+Toutes font défiler les pages du MPD sur un appui court, dans le même ordre sur les deux MPD : FCR, puis WPN, puis TSD, puis VID, puis A/C, puis FCR…
+Ce sont toutes les pages qui ont leur propre bouton autour de l'écran, sauf COM.
 
 Elles ne diffèrent que par l'appui long (tenu 0,5 s) : on choisit sa page d'accès direct en assignant la commande correspondante à son bouton du HOTAS, sans aucun fichier à modifier.
 
@@ -48,14 +44,12 @@ Elles ne diffèrent que par l'appui long (tenu 0,5 s) : on choisit sa page d'acc
 |---|---|
 | « Left MPD: next page » | aucun : la page change dès l'appui |
 | « Left MPD: next page, hold FCR » | va sur FCR |
-| « Left MPD: next page, hold WPN » / « TSD » / « VID » / « COM » / « A/C » | va sur cette page |
+| « Left MPD: next page, hold WPN » / « TSD » / « VID » | va sur cette page |
 
 Même chose pour « Right MPD: … ».
 Avec un appui long, l'appui court ne part qu'au relâchement, puisque le mod doit attendre de savoir si le bouton est tenu ; sans appui long, la page change dès l'appui.
 
-Les sept commandes d'un MPD partagent la même position dans le cycle.
-Un appui long sur une page du cycle y replace le cycle : après « hold TSD » à gauche, l'appui court suivant donne FCR.
-Un appui long sur une page hors du cycle (VID, COM, A/C) laisse le cycle où il en était.
+Les cinq commandes d'un MPD partagent la même position dans le cycle, et un appui long y replace le cycle : après « hold TSD », l'appui court suivant donne VID.
 Le mod ne voit pas les boutons appuyés à la souris ni les pages changées autrement : il ne retient que son propre dernier appui.
 
 Chaque appui est écrit dans `dcs.log`, lignes `COCKPIT_CYCLES`, avec l'équipement et la commande visés ; pendant la mise au point, il s'affiche aussi à l'écran (`show_messages` dans `config/AH-64D.lua`).
@@ -77,7 +71,9 @@ Reste à trancher en jeu lequel fonctionne, et pour le tireur.
 
 Le mod est un équipement Lua (`avLuaDevice`, numéro 251) qui reçoit des « slots » : 16 au plus, chacun avec une commande touche enfoncée (3000 + n) et une commande touche relâchée (3100 + n), ce qui permet de mesurer la durée de l'appui.
 `config/AH-64D.lua` donne à chaque slot une action courte et une action longue : appuyer sur le bouton suivant d'un cycle, ou toujours sur le même bouton (puis le relâcher 0,1 s plus tard).
-Les slots 1 à 7 sont le MPD gauche, 8 à 14 le MPD droit, dans l'ordre des commandes ajoutées à dcs-community-keybinds.
+Les slots 1 à 5 sont le MPD gauche, 8 à 12 le MPD droit, dans l'ordre des commandes ajoutées à dcs-community-keybinds.
+Ces numéros ne doivent jamais changer : DCS enregistre les assignations des pilotes sous le numéro de la commande, et une renumérotation les ferait pointer ailleurs sans prévenir.
+Les slots 6, 7, 13 et 14 (appuis longs COM et A/C, retirés) restent libres pour cette raison.
 
 Le mécanisme ne dépend pas de l'Apache.
 Pour un autre avion (un F-16, par exemple), on ajouterait une ligne à `COCKPIT_CYCLES\aircraft.lua`, un `config\<avion>.lua` sur le modèle de celui de l'Apache (boutons trouvés dans `Mods\aircraft\<avion>\Cockpit\Scripts\clickabledata.lua`), et ses commandes dans dcs-community-keybinds.
