@@ -59,7 +59,7 @@ Il faut [Open Mod Manager](https://github.com/iquercorb/OpenModMan), configuré 
 | `Cockpit_Mods_Hook_v<version>.ozp` | [page Releases de ce dépôt](https://github.com/davidp57/dcs-cockpit-mods/releases) | Game files |
 | `Cockpit_Cycles_v<version>.ozp` | [page Releases de ce dépôt](https://github.com/davidp57/dcs-cockpit-mods/releases) | Game files |
 | `Quaggles_Injector` | [Quaggles' DCS Input Command Injector](https://github.com/Quaggles/dcs-input-command-injector) | Game files |
-| `Custom_Keybinds`, version du 2026-11-14 ou plus récente | commandes de [dcs-community-keybinds](https://github.com/davidp57/dcs-community-keybinds) | User files |
+| `Custom_Keybinds`, version du 2026-11-14 ou plus récente | diffusé sur les canaux de la VEAF (sources : [dcs-community-keybinds](https://github.com/davidp57/dcs-community-keybinds)) | User files |
 
 Les deux premiers sont ce mod.
 L'injecteur de Quaggles permet d'ajouter des commandes à DCS sans toucher aux fichiers des modules ; Custom_Keybinds contient les commandes elles-mêmes, avec beaucoup d'autres commandes de la communauté.
