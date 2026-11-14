@@ -17,7 +17,9 @@
 local SLOT_COUNT  = 8
 local CMD_DOWN    = 3000 -- slot n pressed: CMD_DOWN + n
 local CMD_UP      = 3100 -- slot n released: CMD_UP + n
-local UPDATE_STEP = 0.02 -- seconds of model time between two update() calls
+-- Seconds of model time between two update() calls. Durations are counted in model time:
+-- under time acceleration, a long press is shorter in real time.
+local UPDATE_STEP = 0.02
 
 local DEFAULTS = {
 	long_press    = 0.5,  -- seconds held before the long action runs
@@ -135,6 +137,9 @@ local function load_config()
 	for name, value in pairs(DEFAULTS) do
 		if config[name] == nil then
 			settings[name] = value
+		elseif type(config[name]) ~= type(value) then
+			log_error(name.." must be a "..type(value)..", not "..tostring(config[name])..": "..tostring(value).." used")
+			settings[name] = value
 		else
 			settings[name] = config[name]
 		end
@@ -223,8 +228,10 @@ local function run(n, kind)
 	else
 		button = action.press
 	end
-	follow(button, action)
 	local ok = press(button)
+	if ok then
+		follow(button, action)
+	end
 	local text = string.format("slot %d %s (held %.2f s): %s%s", n, kind, slot.held_time,
 		describe(button), ok and "" or " FAILED")
 	log_info(text)
@@ -239,9 +246,8 @@ local function on_down(n)
 		log_info("slot "..n.." pressed, no action for this aircraft")
 		return
 	end
-	if slot.held then
-		return
-	end
+	-- Already held: its release was lost (focus lost while holding the key, say). Take this
+	-- press as a new one rather than ignore it.
 	slot.held = true
 	slot.held_time = 0
 	if slot.long then

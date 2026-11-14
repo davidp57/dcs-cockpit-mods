@@ -22,6 +22,10 @@
 .PARAMETER Part
     Hook, Cycles, or both (the default).
 
+.PARAMETER Force
+    With -Uninstall: take the hook out even without the backup this script makes, that is
+    when it may come from the Cockpit_Mods_Hook package (Open Mod Manager owns it then).
+
 .EXAMPLE
     .\install.ps1
 .EXAMPLE
@@ -35,7 +39,8 @@ param(
     [string]$DcsPath = "C:\jeux\DCS World",
     [ValidateSet("Hook", "Cycles")]
     [string[]]$Part = @("Hook", "Cycles"),
-    [switch]$Uninstall
+    [switch]$Uninstall,
+    [switch]$Force
 )
 
 $ErrorActionPreference = "Stop"
@@ -53,7 +58,7 @@ $CyclesFolder = Join-Path $Cockpit "COCKPIT_CYCLES"
 $CyclesDeclare = Join-Path $ModsFolder "COCKPIT_CYCLES.lua"
 
 # Same line as tools\build_omm.py, HOOK_LINE.
-$HookLine = 'do local ok, err = pcall(dofile, LockOn_Options.common_script_path.."COCKPIT_MODS/_loader.lua") if not ok then print("COCKPIT_MODS: hook failed: "..tostring(err)) end end'
+$HookLine = 'do local ok, err = pcall(dofile, LockOn_Options.common_script_path.."COCKPIT_MODS/_loader.lua") if not ok and print then print("COCKPIT_MODS: hook failed: "..tostring(err)) end end'
 
 $Utf8Strict = New-Object System.Text.UTF8Encoding($false, $true)
 
@@ -141,6 +146,12 @@ if (-not (Test-Path -LiteralPath $DeclareFile)) {
 }
 
 if ($Uninstall) {
+    if ($Part -contains "Hook" -and -not $Force -and (Test-Block (Read-Text $DeclareFile).Text) -and
+        -not (Test-Path -LiteralPath ($DeclareFile + $BackupExt))) {
+        # No backup of ours: the hook comes from the Cockpit_Mods_Hook package, and Open Mod
+        # Manager owns these files.
+        throw "The hook in $DeclareFile was not installed by this script (no $BackupExt backup): uninstall the Cockpit_Mods_Hook package in Open Mod Manager, or pass -Force to take it out anyway."
+    }
     if ($Part -contains "Cycles") {
         Remove-IfPresent $CyclesDeclare
         Remove-IfPresent $CyclesFolder
@@ -167,14 +178,15 @@ if ($Part -contains "Hook") {
     if (Test-Block (Read-Text $DeclareFile).Text $LegacyMarker) {
         throw "An IFR curtain 1.x is installed (its own line in $DeclareFile). Uninstall it first: the IFR_Curtain 1.x package in Open Mod Manager, or the curtain's install.ps1 -Uninstall for a development install. Then run this script, then install the curtain 2.0."
     }
+    Set-Block $DeclareFile @($HookLine)
     New-Item -ItemType Directory -Force -Path $ModsFolder | Out-Null
     Copy-Item -LiteralPath $HookSource -Destination $Loader -Force
     Write-Host "Copied: $Loader"
-    Set-Block $DeclareFile @($HookLine)
 }
 
 if ($Part -contains "Cycles") {
-    if (-not (Test-Path -LiteralPath $Loader)) {
+    # Both halves: a DCS update or repair puts the kneeboard file back and leaves the loader.
+    if (-not (Test-Path -LiteralPath $Loader) -or -not (Test-Block (Read-Text $DeclareFile).Text)) {
         throw "The cockpit mods hook is not installed: run .\install.ps1 -Part Hook first (or install the Cockpit_Mods_Hook package)."
     }
     Remove-IfPresent $CyclesFolder

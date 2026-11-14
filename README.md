@@ -118,6 +118,8 @@ Pour modifier les mods et les essayer sans repasser par Open Mod Manager (ne pas
 Le script copie les fichiers et ajoute la ligne de l'accroche au fichier du kneeboard, entre `-- COCKPIT-MODS BEGIN` et `-- COCKPIT-MODS END`.
 Le fichier est sauvegardé en `.cockpit-mods.bak` avant la modification, sauvegarde reprise chaque fois qu'il est trouvé sans l'accroche (après une mise à jour de DCS, par exemple).
 La désinstallation le rend identique à l'original et supprime la sauvegarde ; un fichier qui n'est pas en UTF-8 valide est refusé plutôt que réécrit.
+Sans cette sauvegarde, l'accroche vient sans doute du paquet Open Mod Manager : la désinstallation refuse d'y toucher, sauf avec `-Force`.
+`-Part Cycles` refuse de s'installer si l'accroche manque, chargeur ou ligne du kneeboard (une mise à jour de DCS retire la ligne et laisse le chargeur).
 L'accroche refuse de s'installer par-dessus la ligne d'un rideau IFR 1.x : lancer d'abord `install.ps1 -Uninstall` du rideau.
 
 Relancer le script après chaque modification, puis relancer la mission : les scripts du cockpit sont relus à chaque démarrage de mission, sans redémarrer DCS.

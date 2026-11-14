@@ -122,6 +122,12 @@ SetCommand(3101, 1); tick(0.2)
 check(#presses_down() == 1, "releasing after a long press does nothing more")
 
 pressed = {}
+SetCommand(3001, 1); tick(0.1)             -- its release gets lost
+SetCommand(3001, 1); tick(0.1); SetCommand(3101, 1); tick(0.2)
+seq = presses_down()
+check(#seq == 1 and seq[1] == WPN, "a press after a lost release counts as a new short press")
+
+pressed = {}
 SetCommand(3002, 1); SetCommand(3102, 1); tick(0.2)
 check(#pressed == 0, "unconfigured slot 2 presses nothing")
 

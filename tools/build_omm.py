@@ -18,6 +18,7 @@ import re
 import sys
 import zipfile
 from pathlib import Path
+from xml.sax.saxutils import escape
 
 REPO = Path(__file__).resolve().parent.parent
 COCKPIT = Path("Scripts/Aircrafts/_Common/Cockpit")
@@ -27,7 +28,7 @@ KNEEBOARD = COCKPIT / "KNEEBOARD" / "declare_kneeboard_device.lua"
 # module's other devices down with it.
 HOOK_LINE = (
     'do local ok, err = pcall(dofile, LockOn_Options.common_script_path.."COCKPIT_MODS/_loader.lua") '
-    'if not ok then print("COCKPIT_MODS: hook failed: "..tostring(err)) end end'
+    'if not ok and print then print("COCKPIT_MODS: hook failed: "..tostring(err)) end end'
 )
 MARKER = "COCKPIT-MODS"
 # Blocks left in the kneeboard file by development installs, stripped from the copy.
@@ -111,7 +112,7 @@ def main():
         "<Open_Mod_Manager_Package>\n"
         f"\t<install>{name}</install>\n"
         f"\t<category>{CATEGORY}</category>\n"
-        f"\t<description>{package_info['description']}</description>\n"
+        f"\t<description>{escape(package_info['description'])}</description>\n"
         "</Open_Mod_Manager_Package>\n"
     )
     source = package_info["source"]
