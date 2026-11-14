@@ -8,9 +8,9 @@
 --
 -- An action presses a cockpit button: the next one of a cycle, or always the same one.
 -- Each cycle remembers its position; slots given the same cycle table share it. Pressing a
--- button through any action also moves every
--- other cycle holding that button to it: after a long press on FCR, a cycle FCR, WPN, TSD
--- goes on with WPN. Buttons pressed with the mouse are not seen.
+-- button through any action also moves every other cycle holding that button to it: after
+-- a long press on FCR, a cycle FCR, WPN, TSD goes on with WPN. Buttons pressed with the
+-- mouse are not seen.
 --
 -- The aircraft's buttons and slots are in config/<file>.lua, chosen by aircraft.lua.
 -- Everything the device does is written to dcs.log, lines COCKPIT_CYCLES.

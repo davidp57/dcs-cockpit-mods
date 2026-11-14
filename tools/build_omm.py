@@ -6,7 +6,8 @@ Two packages:
   added, since Open Mod Manager can only replace whole files (it backs up the original and
   puts it back on uninstall). The kneeboard file is taken from the DCS install given, so the
   package matches that DCS version: rebuild it after a DCS update that changes the file.
-- cycles: Cockpit_Cycles_v<version>.ozp, the cycles mod. It needs the hook package.
+- cycles: Apache_MPD_Cycles_v<version>.ozp, the AH-64D MPD page cycles. It needs the hook
+  package.
 
 Each package also holds modpack.xml and readme.md, as Open Mod Manager expects.
 
@@ -41,7 +42,7 @@ PACKAGES = {
         "name": "Cockpit_Mods_Hook",
         "source": REPO / "hook" / "mod",
         "kneeboard": True,
-        "description": """Accroche partagée des mods de cockpit (rideau IFR, cycles de commandes…) : permet à plusieurs mods de déclarer leurs équipements sans remplacer chacun le même fichier de DCS.
+        "description": """Accroche partagée des mods de cockpit (rideau IFR, cycles de pages des MPD de l'Apache…) : permet à plusieurs mods de déclarer leurs équipements sans remplacer chacun le même fichier de DCS.
 
 Seul, ce paquet ne fait rien ; il est demandé par les mods qui s'en servent.
 
@@ -59,22 +60,21 @@ Plusieurs mods peuvent ainsi ajouter leurs équipements, alors qu'Open Mod Manag
 """,
     },
     "cycles": {
-        "name": "Cockpit_Cycles",
+        "name": "Apache_MPD_Cycles",
         "source": REPO / "cycles" / "mod",
         "kneeboard": False,
-        "description": """Cycles de commandes : un seul bouton du HOTAS fait défiler plusieurs boutons du cockpit (par exemple les pages FCR, WPN et TSD du MPD gauche de l'AH-64D), avec une action différente pour un appui long.
+        "description": """AH-64D : un seul bouton du HOTAS fait défiler les pages d'un MPD (gauche : FCR, WPN, TSD ; droit : TSD, WPN, FCR), et un appui long peut aller directement sur une page choisie (FCR, WPN, TSD, VID, COM ou A/C).
 
-Avions configurés : AH-64D.
+Demande le paquet Cockpit_Mods_Hook (« game files »). Touches (catégorie « MPD page cycles ») : fournies par Custom_Keybinds (« user files »), avec Quaggles Injector (« game files »). Ne passe pas l'IC.""",
+        "readme": """# Apache MPD cycles
 
-Demande le paquet Cockpit_Mods_Hook (« game files »). Touches (catégorie « Cockpit cycles ») : fournies par Custom_Keybinds (« user files »), avec Quaggles Injector (« game files »). Ne passe pas l'IC.""",
-        "readme": """# Cockpit cycles
+AH-64D : un seul bouton du HOTAS fait défiler les pages d'un MPD.
 
-Cycles de commandes pour DCS World : un seul bouton du HOTAS fait défiler plusieurs boutons du cockpit, avec une action différente pour un appui long (0,5 s par défaut).
-
-- Avions configurés : AH-64D (MPD gauche : appui court FCR → WPN → TSD → FCR…, appui long FCR).
-- Demande le paquet Cockpit_Mods_Hook.
-- Touches : « Cockpit cycles: slot 1 » à « slot 8 », catégorie « Cockpit cycles », fournies par le paquet Custom_Keybinds avec Quaggles Injector.
-- Ce que fait chaque appui est écrit dans `dcs.log`, lignes `COCKPIT_CYCLES`.
+- MPD gauche : FCR, puis WPN, puis TSD, puis FCR… ; MPD droit : TSD, puis WPN, puis FCR, puis TSD…
+- Sept commandes par MPD, catégorie « MPD page cycles » : « Left MPD: next page » (la page change dès l'appui), et « Left MPD: next page, hold FCR » (ou WPN, TSD, VID, COM, A/C) où un appui long (0,5 s) va directement sur cette page. Même chose pour « Right MPD ».
+- On choisit sa page d'accès direct en assignant la commande correspondante, sans fichier à modifier.
+- Demande le paquet Cockpit_Mods_Hook ; commandes fournies par le paquet Custom_Keybinds avec Quaggles Injector.
+- Chaque appui est écrit dans `dcs.log`, lignes `COCKPIT_CYCLES`.
 - Ne passe pas l'IC : solo et serveurs qui ne vérifient pas les scripts.
 """,
     },
