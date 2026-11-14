@@ -96,9 +96,6 @@ function Remove-Block([string]$Text) {
 # Appends the block at the end of the file.
 function Set-Block([string]$Path, [string[]]$Lines) {
     $file = Read-Text $Path
-    if (Test-Block $file.Text $LegacyMarker) {
-        throw "The IFR curtain is installed the old way (its own line in $Path). Run the IFR curtain's install.ps1 -Uninstall first, then this script, then the curtain's install.ps1 again."
-    }
     if (-not (Test-Block $file.Text)) {
         # The file is as DCS shipped it: (re)take the backup from it.
         Copy-Item -LiteralPath $Path -Destination ($Path + $BackupExt) -Force
@@ -166,6 +163,10 @@ if ($Uninstall) {
 }
 
 if ($Part -contains "Hook") {
+    # Checked before copying anything, so a refusal leaves no loader behind.
+    if (Test-Block (Read-Text $DeclareFile).Text $LegacyMarker) {
+        throw "An IFR curtain 1.x is installed (its own line in $DeclareFile). Uninstall it first: the IFR_Curtain 1.x package in Open Mod Manager, or the curtain's install.ps1 -Uninstall for a development install. Then run this script, then install the curtain 2.0."
+    }
     New-Item -ItemType Directory -Force -Path $ModsFolder | Out-Null
     Copy-Item -LiteralPath $HookSource -Destination $Loader -Force
     Write-Host "Copied: $Loader"
