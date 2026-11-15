@@ -28,12 +28,13 @@ Dans la variante sans appui long, il part dès que tu appuies.
 
 Chaque MPD (gauche et droit) a son propre cycle :
 
-![Le cycle des pages : FCR, WPN, TSD, VID, A/C, puis FCR à nouveau](docs/images/cycle.svg)
+![Le cycle des pages : FCR, WPN, TSD, VID, ENG, ASE, puis FCR à nouveau](docs/images/cycle.svg)
 
-Ce sont toutes les pages qui ont leur propre bouton autour de l'écran, sauf COM.
-L'appui long va directement sur FCR, WPN, TSD ou VID.
+FCR, WPN, TSD et VID ont leur propre bouton autour de l'écran.
+ENG et ASE n'en ont pas : le mod passe par le menu, il appuie sur M, puis sur la page dans le menu, 0,2 s plus tard.
+L'appui long va directement sur l'une des six pages.
 
-Dans Options > Commandes, catégorie **MPD page cycles**, chaque MPD a cinq commandes ; assigne-en **une** au bouton du MPD gauche et **une** au bouton du MPD droit :
+Dans Options > Commandes, catégorie **MPD page cycles**, chaque MPD a sept commandes ; assigne-en **une** au bouton du MPD gauche et **une** au bouton du MPD droit :
 
 | Commande | Appui court | Appui long |
 |---|---|---|
@@ -42,6 +43,8 @@ Dans Options > Commandes, catégorie **MPD page cycles**, chaque MPD a cinq comm
 | Left MPD: next page, hold WPN | page suivante, au relâchement | page WPN |
 | Left MPD: next page, hold TSD | page suivante, au relâchement | page TSD |
 | Left MPD: next page, hold VID | page suivante, au relâchement | page VID |
+| Left MPD: next page, hold ENG | page suivante, au relâchement | page ENG |
+| Left MPD: next page, hold ASE | page suivante, au relâchement | page ASE |
 
 Même chose avec « Right MPD » pour le MPD droit.
 
@@ -59,7 +62,7 @@ Il faut [Open Mod Manager](https://github.com/iquercorb/OpenModMan), configuré 
 | `Cockpit_Mods_Hook_v<version>.ozp` | [page Releases de ce dépôt](https://github.com/davidp57/dcs-cockpit-mods/releases) | Game files |
 | `Cockpit_Cycles_v<version>.ozp` | [page Releases de ce dépôt](https://github.com/davidp57/dcs-cockpit-mods/releases) | Game files |
 | `Quaggles_Injector` | [Quaggles' DCS Input Command Injector](https://github.com/Quaggles/dcs-input-command-injector) | Game files |
-| `Custom_Keybinds`, version du 2026-11-14 ou plus récente | diffusé sur les canaux de la VEAF (sources : [dcs-community-keybinds](https://github.com/davidp57/dcs-community-keybinds)) | User files |
+| `Custom_Keybinds`, version du 2026-11-15 ou plus récente (celle du 2026-11-14 n'a pas les commandes hold ENG et hold ASE) | diffusé sur les canaux de la VEAF (sources : [dcs-community-keybinds](https://github.com/davidp57/dcs-community-keybinds)) | User files |
 
 Les deux premiers sont ce mod.
 L'injecteur de Quaggles permet d'ajouter des commandes à DCS sans toucher aux fichiers des modules ; Custom_Keybinds contient les commandes elles-mêmes, avec beaucoup d'autres commandes de la communauté.
@@ -90,6 +93,7 @@ Si la mise à jour a changé ce fichier, il faut une nouvelle version du paquet 
 - **Multijoueur** : le mod modifie des scripts de DCS, donc la vérification d'intégrité (IC) échoue. Il marche en solo et sur les serveurs qui ne vérifient pas les scripts.
 - **Le mod ne voit pas tes clics à la souris** : il retient seulement le dernier bouton qu'il a lui-même appuyé. Après un changement de page à la souris, l'appui suivant peut donner une page inattendue ; le cycle se recale au tour suivant.
 - **Un appui long sur un bouton du cycle y replace le cycle** : sur l'AH-64D, après un appui long sur TSD, l'appui court suivant donne VID.
+- **AH-64D, ENG et ASE passent par le menu M** : si le menu est déjà ouvert sur le MPD (à la souris), l'appui sur M n'y mène pas, et la touche suivante peut donner une autre page. Le cycle se recale au tour suivant.
 - **Ce que fait chaque appui est écrit dans `Saved Games\DCS\Logs\dcs.log`**, lignes `COCKPIT_CYCLES` : c'est là qu'il faut regarder si un bouton ne fait rien.
 
 ## Pour les développeurs
@@ -127,10 +131,12 @@ Le mod (`cycles/`) a deux couches :
 - **une configuration par avion** (`COCKPIT_CYCLES\config\<avion>.lua`), choisie par `aircraft.lua` d'après le chemin des scripts de cockpit du module, et les commandes de l'avion dans dcs-community-keybinds.
 
 Le moteur est un équipement Lua (`avLuaDevice`, numéro 251) qui reçoit des « slots » : 40 au plus, chacun avec une commande touche enfoncée (3000 + n) et une commande touche relâchée (3100 + n), ce qui permet de mesurer la durée de l'appui.
-La configuration de l'avion donne à chaque slot une action courte et une action longue : appuyer sur le bouton suivant d'un cycle, ou toujours sur le même bouton (puis le relâcher 0,1 s plus tard), comme le ferait un clic de souris (`performClickableAction`).
+La configuration de l'avion donne à chaque slot une action courte et une action longue : passer à l'étape suivante d'un cycle, ou toujours à la même étape.
+Une étape est un bouton du cockpit, appuyé puis relâché 0,1 s plus tard comme le ferait un clic de souris (`performClickableAction`), ou une suite de boutons appuyés l'un après l'autre (`{sequence = {bouton, bouton}, label = ...}`), par exemple une touche de menu puis la page dans le menu.
+Une nouvelle étape sur un équipement attend la fin d'une suite encore en cours sur le même équipement : l'interrompre laisserait l'écran à mi-chemin (sur l'AH-64D, le menu ouvert, où un nouvel appui sur M ouvre DMS).
 Des slots qui reçoivent le même cycle partagent sa position.
 
-Réglages d'un fichier de configuration : `long_press` (seuil de l'appui long, en secondes), `release_after` (délai avant de relâcher le bouton du cockpit), `show_messages` (`true` affiche aussi chaque appui à l'écran, utile pour régler un nouvel avion).
+Réglages d'un fichier de configuration : `long_press` (seuil de l'appui long, en secondes), `release_after` (délai avant de relâcher le bouton du cockpit), `sequence_step` (délai entre deux boutons d'une suite, plus long que `release_after` pour que le premier soit relâché avant le second), `show_messages` (`true` affiche aussi chaque appui à l'écran, utile pour régler un nouvel avion).
 
 #### Ajouter un avion
 
@@ -148,12 +154,15 @@ Les commandes du tireur ont donc leurs propres numéros, envoyés par les fichie
 
 | Siège | MPD gauche | MPD droit |
 |---|---|---|
-| pilote | slots 1 à 5 | slots 8 à 12 |
-| tireur | slots 21 à 25 | slots 28 à 32 |
+| pilote | slots 1 à 7 | slots 8 à 14 |
+| tireur | slots 21 à 27 | slots 28 à 34 |
 
-Dans chaque MPD : « next page », puis « hold FCR », « WPN », « TSD », « VID ».
+Dans chaque MPD : « next page », puis « hold FCR », « WPN », « TSD », « VID », « ENG », « ASE ».
 Ces numéros ne doivent jamais changer : DCS enregistre les assignations des pilotes sous le numéro de la commande, et une renumérotation les ferait pointer ailleurs sans prévenir.
-Les slots 6, 7, 13 et 14 (appuis longs COM et A/C, retirés) restent libres pour cette raison.
+Les slots 6, 7, 13 et 14 ont été des appuis longs COM et A/C, retirés le 2026-11-14 sans avoir jamais été diffusés ; ils ont été repris pour ENG et ASE le 2026-11-15.
+
+ENG et ASE sont des suites : M (B1), puis B2 pour ENG ou L3 pour ASE, d'après `Displays\MFD\indicator\Pages\MPD_MENU.lua` de l'AH-64D.
+Le bouton A/C n'est pas utilisé pour ENG : il peut ouvrir une autre page A/C (FLT, FUEL…), sans doute la dernière affichée (pas vérifié en jeu).
 
 ### Construire les paquets
 
@@ -196,7 +205,7 @@ Relancer le script après chaque modification, puis relancer la mission : les sc
 
 ### Vérification hors jeu
 
-`tests\run.ps1` exécute l'accroche et les cycles de l'AH-64D avec un Lua 5.1 ordinaire et des fonctions de DCS simulées, une fois avec `lfs` et une fois sans : chargement par l'accroche, cycle des appuis courts, appuis longs, sièges pilote et tireur, relâchement des boutons.
+`tests\run.ps1` exécute l'accroche et les cycles de l'AH-64D avec un Lua 5.1 ordinaire et des fonctions de DCS simulées, une fois avec `lfs` et une fois sans : chargement par l'accroche, cycle des appuis courts, appuis longs, suites de boutons (ordre, délai, attente entre deux suites), sièges pilote et tireur, relâchement des boutons.
 Il demande le Lua 5.1 de ZeroBrane Studio (`-Lua` pour un autre) et les scripts de l'AH-64D d'une installation de DCS.
 
 ```powershell
