@@ -65,7 +65,7 @@ Plusieurs mods peuvent ainsi ajouter leurs équipements, alors qu'Open Mod Manag
         "kneeboard": False,
         "description": """Cycles de cockpit : un seul bouton du HOTAS fait défiler plusieurs boutons du cockpit (les pages d'un écran, par exemple), et un appui long peut aller directement sur l'un d'eux.
 
-Avions pris en charge : AH-64D (pages des deux MPD : FCR, WPN, TSD, VID, A/C ; appui long sur FCR, WPN, TSD ou VID).
+Avions pris en charge : AH-64D (pages des deux MPD : FCR, WPN, TSD, VID, ENG, ASE ; appui long sur l'une d'elles).
 
 Demande le paquet Cockpit_Mods_Hook (« game files »). Touches : fournies par Custom_Keybinds (« user files »), avec Quaggles Injector (« game files »). Ne passe pas l'IC.
 
@@ -76,7 +76,7 @@ Un seul bouton du HOTAS fait défiler plusieurs boutons du cockpit (les pages d'
 
 Avions pris en charge :
 
-- AH-64D, catégorie « MPD page cycles » : chaque MPD fait défiler FCR, WPN, TSD, VID, A/C. Cinq commandes par MPD : « Left MPD: next page » (la page change dès l'appui), et « Left MPD: next page, hold FCR » (ou WPN, TSD, VID) où un appui long va directement sur cette page. Même chose pour « Right MPD ». Pilote et tireur.
+- AH-64D, catégorie « MPD page cycles » : chaque MPD fait défiler FCR, WPN, TSD, VID, ENG, ASE (ENG et ASE par le menu M). Sept commandes par MPD : « Left MPD: next page » (la page change dès l'appui), et « Left MPD: next page, hold FCR » (ou WPN, TSD, VID, ENG, ASE) où un appui long va directement sur cette page. Même chose pour « Right MPD ». Pilote et tireur. Demande Custom_Keybinds du 2026-11-15 ou plus récent.
 
 Pour tous :
 
